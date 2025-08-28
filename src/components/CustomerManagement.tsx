@@ -3,12 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Phone, MapPin, User } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Plus, Search, Phone, MapPin, User, Edit, Trash2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 
 const CustomerManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
-
-  const customers = [
+  const [customers, setCustomers] = useState([
     {
       id: 1,
       name: 'Ibu Sari Wulandari',
@@ -49,12 +52,64 @@ const CustomerManagement = () => {
       status: 'Aktif',
       lastOrder: '3 hari lalu'
     },
-  ];
+  ]);
+  
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      phone: '',
+      address: '',
+      status: 'Aktif'
+    }
+  });
 
   const filteredCustomers = customers.filter(customer =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.phone.includes(searchTerm)
   );
+
+  const handleAddCustomer = (data) => {
+    const newCustomer = {
+      id: Math.max(...customers.map(c => c.id), 0) + 1,
+      ...data,
+      totalOrders: 0,
+      totalSpent: 0,
+      lastOrder: 'Belum ada'
+    };
+    setCustomers([...customers, newCustomer]);
+    setIsDialogOpen(false);
+    form.reset();
+  };
+
+  const handleEditCustomer = (customer) => {
+    setEditingCustomer(customer);
+    form.reset(customer);
+    setIsDialogOpen(true);
+  };
+
+  const handleUpdateCustomer = (data) => {
+    setCustomers(customers.map(c => 
+      c.id === editingCustomer.id ? { ...c, ...data } : c
+    ));
+    setIsDialogOpen(false);
+    setEditingCustomer(null);
+    form.reset();
+  };
+
+  const handleDeleteCustomer = (customerId) => {
+    setCustomers(customers.filter(c => c.id !== customerId));
+  };
+
+  const onSubmit = (data) => {
+    if (editingCustomer) {
+      handleUpdateCustomer(data);
+    } else {
+      handleAddCustomer(data);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -63,10 +118,73 @@ const CustomerManagement = () => {
           <h2 className="text-3xl font-bold">Manajemen Pelanggan</h2>
           <p className="text-muted-foreground">Kelola data pelanggan depot Anda</p>
         </div>
-        <Button className="gap-2">
-          <Plus className="w-4 h-4" />
-          Tambah Pelanggan
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2" onClick={() => {
+              setEditingCustomer(null);
+              form.reset();
+            }}>
+              <Plus className="w-4 h-4" />
+              Tambah Pelanggan
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingCustomer ? 'Edit Pelanggan' : 'Tambah Pelanggan'}</DialogTitle>
+              <DialogDescription>
+                {editingCustomer ? 'Ubah data pelanggan' : 'Masukkan data pelanggan baru'}
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nama</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nama pelanggan" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telepon</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nomor telepon" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Alamat</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Alamat lengkap" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button type="submit">
+                    {editingCustomer ? 'Update' : 'Tambah'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
@@ -89,57 +207,55 @@ const CustomerManagement = () => {
             </div>
           </div>
 
-          <div className="grid gap-4">
-            {filteredCustomers.map((customer) => (
-              <Card key={customer.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg">{customer.name}</h3>
-                          <Badge variant={customer.status === 'Premium' ? 'default' : 'secondary'}>
-                            {customer.status}
-                          </Badge>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="w-4 h-4 text-muted-foreground" />
-                            <span>{customer.phone}</span>
-                          </div>
-                          <div className="flex items-start gap-2 text-sm">
-                            <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                            <span className="text-muted-foreground">{customer.address}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Total Pesanan: </span>
-                            <span className="font-medium">{customer.totalOrders}</span>
-                          </div>
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Total Belanja: </span>
-                            <span className="font-medium">Rp {customer.totalSpent.toLocaleString('id-ID')}</span>
-                          </div>
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Pesanan Terakhir: </span>
-                            <span className="font-medium">{customer.lastOrder}</span>
-                          </div>
-                        </div>
-                      </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nama</TableHead>
+                <TableHead>Telepon</TableHead>
+                <TableHead>Alamat</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Total Pesanan</TableHead>
+                <TableHead>Total Belanja</TableHead>
+                <TableHead>Pesanan Terakhir</TableHead>
+                <TableHead>Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredCustomers.map((customer) => (
+                <TableRow key={customer.id}>
+                  <TableCell className="font-medium">{customer.name}</TableCell>
+                  <TableCell>{customer.phone}</TableCell>
+                  <TableCell className="max-w-xs truncate">{customer.address}</TableCell>
+                  <TableCell>
+                    <Badge variant={customer.status === 'Premium' ? 'default' : 'secondary'}>
+                      {customer.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{customer.totalOrders}</TableCell>
+                  <TableCell>Rp {customer.totalSpent.toLocaleString('id-ID')}</TableCell>
+                  <TableCell>{customer.lastOrder}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleEditCustomer(customer)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleDeleteCustomer(customer.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
 
           {filteredCustomers.length === 0 && (
             <div className="text-center py-8">

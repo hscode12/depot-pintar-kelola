@@ -3,6 +3,7 @@ import Navigation from '@/components/Navigation';
 import Dashboard from '@/components/Dashboard';
 import CustomerManagement from '@/components/CustomerManagement';
 import RevenueTracking from '@/components/RevenueTracking';
+import ExpenseTracking from '@/components/ExpenseTracking';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -16,7 +17,7 @@ const Index = () => {
       case 'revenue':
         return <RevenueTracking />;
       case 'expenses':
-        return <div className="p-6"><h2 className="text-2xl font-bold">Pengeluaran - Coming Soon</h2></div>;
+        return <ExpenseTracking />;
       case 'settings':
         return <div className="p-6"><h2 className="text-2xl font-bold">Pengaturan - Coming Soon</h2></div>;
       default:

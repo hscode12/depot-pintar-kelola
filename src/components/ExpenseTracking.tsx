@@ -6,105 +6,99 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Plus, TrendingUp, DollarSign, Calendar, Edit, Trash2 } from 'lucide-react';
+import { Plus, TrendingDown, DollarSign, Calendar, Edit, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
-const RevenueTracking = () => {
-  const [transactions, setTransactions] = useState([
+const ExpenseTracking = () => {
+  const [expenses, setExpenses] = useState([
     {
       id: 1,
-      customer: 'Ibu Sari Wulandari',
-      amount: 45000,
-      quantity: '3 Galon',
+      description: 'Pembelian Galon Kosong',
+      category: 'Operasional',
+      amount: 2500000,
       date: '2024-01-15',
-      time: '14:30',
-      type: 'Penjualan'
+      supplier: 'CV Plastik Jaya'
     },
     {
       id: 2,
-      customer: 'Toko Berkah Jaya',
-      amount: 150000,
-      quantity: '10 Galon',
-      date: '2024-01-15',
-      time: '12:15',
-      type: 'Penjualan'
+      description: 'Biaya Listrik',
+      category: 'Utilitas',
+      amount: 450000,
+      date: '2024-01-14',
+      supplier: 'PLN'
     },
     {
       id: 3,
-      customer: 'Pak Joko Santoso',
-      amount: 60000,
-      quantity: '4 Galon',
-      date: '2024-01-14',
-      time: '16:45',
-      type: 'Penjualan'
+      description: 'Gaji Karyawan',
+      category: 'SDM',
+      amount: 3200000,
+      date: '2024-01-10',
+      supplier: '-'
     },
     {
       id: 4,
-      customer: 'Warung Mina Segar',
-      amount: 90000,
-      quantity: '6 Galon',
-      date: '2024-01-14',
-      time: '10:20',
-      type: 'Penjualan'
+      description: 'Maintenance Mesin',
+      category: 'Maintenance',
+      amount: 750000,
+      date: '2024-01-08',
+      supplier: 'Bengkel Teknik'
     },
   ]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [editingExpense, setEditingExpense] = useState(null);
 
   const form = useForm({
     defaultValues: {
-      customer: '',
+      description: '',
+      category: '',
       amount: '',
-      quantity: '',
       date: '',
-      time: '',
-      type: 'Penjualan'
+      supplier: ''
     }
   });
 
   const monthlyStats = {
-    totalRevenue: transactions.reduce((total, transaction) => total + transaction.amount, 0),
-    totalTransactions: transactions.length,
-    averageOrder: transactions.length > 0 ? transactions.reduce((total, transaction) => total + transaction.amount, 0) / transactions.length : 0,
-    growth: 12.5
+    totalExpenses: expenses.reduce((total, expense) => total + expense.amount, 0),
+    totalTransactions: expenses.length,
+    averageExpense: expenses.length > 0 ? expenses.reduce((total, expense) => total + expense.amount, 0) / expenses.length : 0
   };
 
-  const handleAddTransaction = (data) => {
-    const newTransaction = {
-      id: Math.max(...transactions.map(t => t.id), 0) + 1,
+  const handleAddExpense = (data) => {
+    const newExpense = {
+      id: Math.max(...expenses.map(e => e.id), 0) + 1,
       ...data,
       amount: parseInt(data.amount)
     };
-    setTransactions([...transactions, newTransaction]);
+    setExpenses([...expenses, newExpense]);
     setIsDialogOpen(false);
     form.reset();
   };
 
-  const handleEditTransaction = (transaction) => {
-    setEditingTransaction(transaction);
-    form.reset({ ...transaction, amount: transaction.amount.toString() });
+  const handleEditExpense = (expense) => {
+    setEditingExpense(expense);
+    form.reset({ ...expense, amount: expense.amount.toString() });
     setIsDialogOpen(true);
   };
 
-  const handleUpdateTransaction = (data) => {
-    setTransactions(transactions.map(t => 
-      t.id === editingTransaction.id ? { ...t, ...data, amount: parseInt(data.amount) } : t
+  const handleUpdateExpense = (data) => {
+    setExpenses(expenses.map(e => 
+      e.id === editingExpense.id ? { ...e, ...data, amount: parseInt(data.amount) } : e
     ));
     setIsDialogOpen(false);
-    setEditingTransaction(null);
+    setEditingExpense(null);
     form.reset();
   };
 
-  const handleDeleteTransaction = (transactionId) => {
-    setTransactions(transactions.filter(t => t.id !== transactionId));
+  const handleDeleteExpense = (expenseId) => {
+    setExpenses(expenses.filter(e => e.id !== expenseId));
   };
 
   const onSubmit = (data) => {
-    if (editingTransaction) {
-      handleUpdateTransaction(data);
+    if (editingExpense) {
+      handleUpdateExpense(data);
     } else {
-      handleAddTransaction(data);
+      handleAddExpense(data);
     }
   };
 
@@ -112,36 +106,49 @@ const RevenueTracking = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold">Pendapatan</h2>
-          <p className="text-muted-foreground">Lacak dan analisis pendapatan depot Anda</p>
+          <h2 className="text-3xl font-bold">Pengeluaran</h2>
+          <p className="text-muted-foreground">Lacak dan kelola pengeluaran depot Anda</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2" onClick={() => {
-              setEditingTransaction(null);
+              setEditingExpense(null);
               form.reset();
             }}>
               <Plus className="w-4 h-4" />
-              Tambah Transaksi
+              Tambah Pengeluaran
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingTransaction ? 'Edit Transaksi' : 'Tambah Transaksi'}</DialogTitle>
+              <DialogTitle>{editingExpense ? 'Edit Pengeluaran' : 'Tambah Pengeluaran'}</DialogTitle>
               <DialogDescription>
-                {editingTransaction ? 'Ubah data transaksi' : 'Masukkan data transaksi baru'}
+                {editingExpense ? 'Ubah data pengeluaran' : 'Masukkan data pengeluaran baru'}
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="customer"
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Pelanggan</FormLabel>
+                      <FormLabel>Deskripsi</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nama pelanggan" {...field} />
+                        <Input placeholder="Deskripsi pengeluaran" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Kategori</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Kategori pengeluaran" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -154,20 +161,7 @@ const RevenueTracking = () => {
                     <FormItem>
                       <FormLabel>Jumlah</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="Jumlah pendapatan" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Kuantitas</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Contoh: 3 Galon" {...field} />
+                        <Input type="number" placeholder="Jumlah pengeluaran" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -188,12 +182,12 @@ const RevenueTracking = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="time"
+                  name="supplier"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Waktu</FormLabel>
+                      <FormLabel>Supplier/Vendor</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input placeholder="Nama supplier atau vendor" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -201,7 +195,7 @@ const RevenueTracking = () => {
                 />
                 <DialogFooter>
                   <Button type="submit">
-                    {editingTransaction ? 'Update' : 'Tambah'}
+                    {editingExpense ? 'Update' : 'Tambah'}
                   </Button>
                 </DialogFooter>
               </form>
@@ -210,99 +204,81 @@ const RevenueTracking = () => {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Pendapatan</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Pengeluaran</CardTitle>
+            <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rp {monthlyStats.totalRevenue.toLocaleString('id-ID')}</div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>Bulan ini</span>
-              <span className="text-success font-medium">+{monthlyStats.growth}%</span>
-            </div>
+            <div className="text-2xl font-bold">Rp {monthlyStats.totalExpenses.toLocaleString('id-ID')}</div>
+            <p className="text-xs text-muted-foreground">Bulan ini</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Transaksi</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{monthlyStats.totalTransactions}</div>
-            <p className="text-xs text-muted-foreground">Transaksi bulan ini</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rata-rata Order</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rp {monthlyStats.averageOrder.toLocaleString('id-ID')}</div>
-            <p className="text-xs text-muted-foreground">Per transaksi</p>
+            <div className="text-2xl font-bold">{monthlyStats.totalTransactions}</div>
+            <p className="text-xs text-muted-foreground">Pengeluaran bulan ini</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Hari Ini</CardTitle>
+            <CardTitle className="text-sm font-medium">Rata-rata Pengeluaran</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rp 485.000</div>
-            <p className="text-xs text-muted-foreground">15 transaksi</p>
+            <div className="text-2xl font-bold">Rp {monthlyStats.averageExpense.toLocaleString('id-ID')}</div>
+            <p className="text-xs text-muted-foreground">Per transaksi</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Daftar Transaksi</CardTitle>
-          <CardDescription>Riwayat penjualan depot Anda</CardDescription>
+          <CardTitle>Daftar Pengeluaran</CardTitle>
+          <CardDescription>Riwayat pengeluaran depot Anda</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Pelanggan</TableHead>
-                <TableHead>Kuantitas</TableHead>
+                <TableHead>Deskripsi</TableHead>
+                <TableHead>Kategori</TableHead>
                 <TableHead>Jumlah</TableHead>
                 <TableHead>Tanggal</TableHead>
-                <TableHead>Waktu</TableHead>
-                <TableHead>Tipe</TableHead>
+                <TableHead>Supplier/Vendor</TableHead>
                 <TableHead>Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell className="font-medium">{transaction.customer}</TableCell>
-                  <TableCell>{transaction.quantity}</TableCell>
-                  <TableCell className="text-success font-medium">
-                    +Rp {transaction.amount.toLocaleString('id-ID')}
-                  </TableCell>
-                  <TableCell>{transaction.date}</TableCell>
-                  <TableCell>{transaction.time}</TableCell>
+              {expenses.map((expense) => (
+                <TableRow key={expense.id}>
+                  <TableCell className="font-medium">{expense.description}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{transaction.type}</Badge>
+                    <Badge variant="outline">{expense.category}</Badge>
                   </TableCell>
+                  <TableCell className="text-red-600">-Rp {expense.amount.toLocaleString('id-ID')}</TableCell>
+                  <TableCell>{expense.date}</TableCell>
+                  <TableCell>{expense.supplier}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button 
                         size="sm" 
                         variant="outline"
-                        onClick={() => handleEditTransaction(transaction)}
+                        onClick={() => handleEditExpense(expense)}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
                       <Button 
                         size="sm" 
                         variant="outline"
-                        onClick={() => handleDeleteTransaction(transaction.id)}
+                        onClick={() => handleDeleteExpense(expense.id)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -318,4 +294,4 @@ const RevenueTracking = () => {
   );
 };
 
-export default RevenueTracking;
+export default ExpenseTracking;
