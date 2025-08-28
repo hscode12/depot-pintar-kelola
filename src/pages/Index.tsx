@@ -1,12 +1,35 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import Navigation from '@/components/Navigation';
+import Dashboard from '@/components/Dashboard';
+import CustomerManagement from '@/components/CustomerManagement';
+import RevenueTracking from '@/components/RevenueTracking';
 
 const Index = () => {
+  const [activeSection, setActiveSection] = useState('dashboard');
+
+  const renderSection = () => {
+    switch (activeSection) {
+      case 'dashboard':
+        return <Dashboard />;
+      case 'customers':
+        return <CustomerManagement />;
+      case 'revenue':
+        return <RevenueTracking />;
+      case 'expenses':
+        return <div className="p-6"><h2 className="text-2xl font-bold">Pengeluaran - Coming Soon</h2></div>;
+      case 'settings':
+        return <div className="p-6"><h2 className="text-2xl font-bold">Pengaturan - Coming Soon</h2></div>;
+      default:
+        return <Dashboard />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="flex min-h-screen bg-background">
+      <Navigation activeSection={activeSection} onSectionChange={setActiveSection} />
+      <main className="flex-1">
+        {renderSection()}
+      </main>
     </div>
   );
 };
